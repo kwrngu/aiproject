@@ -1,56 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'user.dart';
-import 'admin_dashboard_page.dart';
-import 'user_dashboard_page.dart';
+import '../models/user.dart';
+import 'login_page.dart';
 
-class LoginPage extends StatefulWidget {
+class SignupPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _SignupPageState createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
 
-  Future<auth.User?> login(String email, String password) async {
+  Future<void> signUp(String name, String email, String password) async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
-      auth.UserCredential userCredential = await auth.FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      auth.UserCredential userCredential = await auth.FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      User newUser = User(
+        id: userCredential.user!.uid,
+        name: name,
+        email: email,
+        role: 'user', // default role
+      );
+
+      await FirebaseFirestore.instance.collection('newProjectUser').doc(newUser.id).set(newUser.toMap());
       setState(() {
         _isLoading = false;
       });
-      return userCredential.user;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Failed to login. Please check your credentials and try again.";
+        _errorMessage = "Failed to sign up. Please try again.";
       });
-      return null;
-    }
-  }
-
-  Future<void> _redirectToDashboard(auth.User user) async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('newProjectUser').doc(user.uid).get();
-    if (doc.exists) {
-      User currentUser = User.fromMap(doc.data() as Map<String, dynamic>);
-      if (currentUser.role == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AdminDashboardPage()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserDashboardPage(user: currentUser)),
-        );
-      }
     }
   }
 
@@ -58,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Log In'),
+        title: Text('Sign Up'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -72,6 +64,14 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
@@ -93,18 +93,19 @@ class _LoginPageState extends State<LoginPage> {
                 ? CircularProgressIndicator()
                 : ElevatedButton(
               onPressed: () async {
-                auth.User? user = await login(_emailController.text, _passwordController.text);
-                if (user != null) {
-                  _redirectToDashboard(user);
-                }
+                await signUp(
+                  _nameController.text,
+                  _emailController.text,
+                  _passwordController.text,
+                );
               },
-              child: Text('Log In'),
+              child: Text('Sign Up'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/signup');
+                Navigator.pushReplacementNamed(context, '/login');
               },
-              child: Text('Don\'t have an account? Sign Up'),
+              child: Text('Already have an account? Log In'),
             ),
           ],
         ),

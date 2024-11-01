@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'leave_application.dart';
-import 'expense_claim.dart';
-import 'shift_details.dart';
+import '../models/user.dart';
+import '../widget/leave_application_card.dart';
+import '../widget/shift_details_card.dart';
 import 'user_profile_page.dart';
 
 class UserDashboardPage extends StatefulWidget {
@@ -53,8 +52,7 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
           children: [
             ShiftDetailCard(user: widget.user),
             LeaveApplicationsCard(user: widget.user),
-            SubmitLeaveApplicationCard(user: widget.user),
-            ExpenseClaimCard(user: widget.user),
+
           ],
         ),
       ),
