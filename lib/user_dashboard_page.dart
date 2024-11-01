@@ -19,13 +19,35 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
   DateTime _selectedEndDate = DateTime.now().add(Duration(days: 1));
   String _selectedLeaveType = 'Annual Leave';
   int _leaveDays = 1;
+  Map<DateTime, String> userShifts = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserShifts();
+  }
+
+  void _loadUserShifts() async {
+    var shiftsSnapshot = await FirebaseFirestore.instance
+        .collection('dutyRosters')
+        .doc(widget.user.id)
+        .collection('shifts')
+        .get();
+
+    setState(() {
+      for (var shiftDoc in shiftsSnapshot.docs) {
+        var date = (shiftDoc['date'] as Timestamp).toDate();
+        userShifts[date] = shiftDoc['shift'];
+        print(userShifts);
+      }
+    });
+  }
 
   void _calculateLeaveDays() {
     setState(() {
       _leaveDays = _selectedEndDate.difference(_selectedStartDate).inDays + 1;
     });
   }
-
   Future<void> submitLeaveApplication(String reason, int days, String type, DateTime startDate, DateTime endDate) async {
     await FirebaseFirestore.instance.collection('userLeaveApplication').add({
       'userId': widget.user.id,
@@ -161,13 +183,27 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('User Dashboard'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              // Handle notification click
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.account_circle),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserProfilePage(user: widget.user)),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
@@ -179,55 +215,107 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: GridView.count(
+          crossAxisCount: 2,
           children: [
-            Text('Welcome, ${widget.user.name}!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserProfilePage(user: widget.user)),
-                );
-              },
-              child: Text('View My Profile'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: showLeaveApplicationDialog,
-              child: Text('Submit Leave Application'),
-            ),
-            SizedBox(height: 20),
-            Text('My Leave Applications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('userLeaveApplication')
-                    .where('userId', isEqualTo: widget.user.id)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return CircularProgressIndicator();
-                  var leaveApplications = snapshot.data!.docs;
-                  return ListView.builder(
-                    itemCount: leaveApplications.length,
-                    itemBuilder: (context, index) {
-                      var leaveApp = leaveApplications[index];
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                        child: ListTile(
-                          title: Text("Leave from ${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year} to ${leaveApp['endDate'].toDate().day}-${leaveApp['endDate'].toDate().month}-${leaveApp['endDate'].toDate().year}"),
-                          subtitle: Text("Reason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+            _buildShiftDetailCard(),
+            _buildLeaveApplicationsCard(),
+            _buildSubmitLeaveApplicationCard(),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildShiftDetailCard() {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      elevation: 5,
+      margin: EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.schedule, size: 50, color: Colors.blue),
+          SizedBox(height: 10),
+          Text('Today\'s Shift', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          SizedBox(height: 10),
+          if (userShifts[DateTime.now()] != null)
+            Text(
+              'Shift: ${userShifts[DateTime.now()]}',
+              style: TextStyle(fontSize: 16),
+            )
+          else
+            Text(
+              'No shift assigned for today',
+              style: TextStyle(fontSize: 16),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeaveApplicationsCard() {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      elevation: 5,
+      margin: EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.assignment, size: 50, color: Colors.green),
+          SizedBox(height: 10),
+          Text('My Leave Applications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('userLeaveApplication')
+                  .where('userId', isEqualTo: widget.user.id)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return CircularProgressIndicator();
+                var leaveApplications = snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: leaveApplications.length,
+                  itemBuilder: (context, index) {
+                    var leaveApp = leaveApplications[index];
+                    return ListTile(
+                      title: Text("Leave from ${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year} to ${leaveApp['endDate'].toDate().day}-${leaveApp['endDate'].toDate().month}-${leaveApp['endDate'].toDate().year}"),
+                      subtitle: Text("Reason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitLeaveApplicationCard() {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      elevation: 5,
+      margin: EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.send, size: 50, color: Colors.orange),
+          SizedBox(height: 10),
+          Text('Submit Leave Application', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          ElevatedButton(
+            onPressed: showLeaveApplicationDialog,
+            child: Text('Submit Leave Application'),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
