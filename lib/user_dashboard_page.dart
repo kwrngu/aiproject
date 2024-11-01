@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:aiproject/user.dart';
+import 'package:aiproject/user_profile_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'user.dart';
-import 'user_profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
 
 class UserDashboardPage extends StatefulWidget {
   final User user;
 
-  UserDashboardPage({required this.user});
+  const UserDashboardPage({Key? key, required this.user}) : super(key: key);
 
   @override
   _UserDashboardPageState createState() => _UserDashboardPageState();
@@ -16,7 +17,7 @@ class UserDashboardPage extends StatefulWidget {
 class _UserDashboardPageState extends State<UserDashboardPage> {
   final TextEditingController _leaveReasonController = TextEditingController();
   DateTime _selectedStartDate = DateTime.now();
-  DateTime _selectedEndDate = DateTime.now().add(Duration(days: 1));
+  DateTime _selectedEndDate = DateTime.now().add(const Duration(days: 1));
   String _selectedLeaveType = 'Annual Leave';
   int _leaveDays = 1;
 
@@ -26,7 +27,8 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
     });
   }
 
-  Future<void> submitLeaveApplication(String reason, int days, String type, DateTime startDate, DateTime endDate) async {
+  Future<void> submitLeaveApplication(String reason, int days, String type,
+      DateTime startDate, DateTime endDate) async {
     await FirebaseFirestore.instance.collection('userLeaveApplication').add({
       'userId': widget.user.id,
       'userName': widget.user.name,
@@ -35,16 +37,20 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
       'days': days,
       'startDate': startDate,
       'endDate': endDate,
-      'status': 'Pending', // Initial status
+      'status': 'Pending',
       'timestamp': FieldValue.serverTimestamp(),
     });
     _leaveReasonController.clear();
     setState(() {
       _selectedStartDate = DateTime.now();
-      _selectedEndDate = DateTime.now().add(Duration(days: 1));
+      _selectedEndDate = DateTime.now().add(const Duration(days: 1));
       _selectedLeaveType = 'Annual Leave';
       _leaveDays = 1;
     });
+    // Optionally show a success message using a SnackBar
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Leave application submitted!')),
+    );
   }
 
   Future<void> showLeaveApplicationDialog() async {
@@ -58,18 +64,19 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Submit Leave Application', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text('Submit Leave Application',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               content: SingleChildScrollView(
                 child: ListBody(
                   children: <Widget>[
                     TextField(
                       controller: _leaveReasonController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Reason for Leave',
                         border: OutlineInputBorder(),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: _selectedLeaveType,
                       onChanged: (newValue) {
@@ -84,13 +91,13 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
                           child: Text(value),
                         );
                       }).toList(),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Type of Leave',
                         border: OutlineInputBorder(),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Text('Select Leave Start Date'),
+                    const SizedBox(height: 10),
+                    const Text('Select Leave Start Date'),
                     ElevatedButton(
                       onPressed: () async {
                         DateTime? picked = await showDatePicker(
@@ -106,11 +113,11 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
                           });
                         }
                       },
-                      child: Text('Select Start Date'),
+                      child: const Text('Select Start Date'),
                     ),
-                    Text("${_selectedStartDate.day}-${_selectedStartDate.month}-${_selectedStartDate.year}"),
-                    SizedBox(height: 10),
-                    Text('Select Leave End Date'),
+                    Text(DateFormat('dd-MM-yyyy').format(_selectedStartDate)),
+                    const SizedBox(height: 10),
+                    const Text('Select Leave End Date'),
                     ElevatedButton(
                       onPressed: () async {
                         DateTime? picked = await showDatePicker(
@@ -126,23 +133,23 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
                           });
                         }
                       },
-                      child: Text('Select End Date'),
+                      child: const Text('Select End Date'),
                     ),
-                    Text("${_selectedEndDate.day}-${_selectedEndDate.month}-${_selectedEndDate.year}"),
-                    SizedBox(height: 10),
+                    Text(DateFormat('dd-MM-yyyy').format(_selectedEndDate)),
+                    const SizedBox(height: 10),
                     Text("Total Leave Days: $_leaveDays"),
                   ],
                 ),
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                   onPressed: () async {
                     await submitLeaveApplication(
                       _leaveReasonController.text,
@@ -166,12 +173,13 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Dashboard'),
+        title: const Text('User Dashboard'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await auth.FirebaseAuth.instance.signOut();
+              // ignore: use_build_context_synchronously
               Navigator.pushReplacementNamed(context, '/login');
             },
           ),
@@ -182,24 +190,29 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Welcome, ${widget.user.name}!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 20),
-            ElevatedButton(
+            Text('Welcome, ${widget.user.name}!',
+                style: const TextStyle(
+                    fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            FilledButton( // Use FilledButton for Material 3
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserProfilePage(user: widget.user)),
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          UserProfilePage(user: widget.user)),
                 );
               },
-              child: Text('View My Profile'),
+              child: const Text('View My Profile'),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
+            const SizedBox(height: 20),
+            FilledButton( // Use FilledButton for Material 3
               onPressed: showLeaveApplicationDialog,
-              child: Text('Submit Leave Application'),
+              child: const Text('Submit Leave Application'),
             ),
-            SizedBox(height: 20),
-            Text('My Leave Applications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            const Text('My Leave Applications',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
@@ -207,17 +220,22 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
                     .where('userId', isEqualTo: widget.user.id)
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                   var leaveApplications = snapshot.data!.docs;
                   return ListView.builder(
                     itemCount: leaveApplications.length,
                     itemBuilder: (context, index) {
                       var leaveApp = leaveApplications[index];
                       return Card(
-                        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 5),
                         child: ListTile(
-                          title: Text("Leave from ${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year} to ${leaveApp['endDate'].toDate().day}-${leaveApp['endDate'].toDate().month}-${leaveApp['endDate'].toDate().year}"),
-                          subtitle: Text("Reason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
+                          title: Text(
+                              "Leave from ${DateFormat('dd-MM-yyyy').format(leaveApp['startDate'].toDate())} to ${DateFormat('dd-MM-yyyy').format(leaveApp['endDate'].toDate())}"),
+                          subtitle: Text(
+                              "Reason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
                         ),
                       );
                     },
@@ -231,5 +249,3 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
     );
   }
 }
-
-// Here is the code generated by the AI Code

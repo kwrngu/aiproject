@@ -1,48 +1,29 @@
-import 'package:aiproject/user.dart';
-import 'package:flutter/material.dart';
+import 'package:aiproject/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'firebase_options.dart';
-import 'signup_page.dart';
-import 'login_page.dart';
-import 'admin_dashboard_page.dart';
-import 'user_dashboard_page.dart';
-import 'user_profile_page.dart';
-import 'splashscreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Modern App',
-      debugShowCheckedModeBanner: false, // Add this line
+      title: 'My Dashboard App',
       theme: ThemeData(
-        primaryColor: Colors.blue,
-        hintColor: Colors.blueAccent,
-        textTheme: TextTheme(
-          bodyMedium: TextStyle(fontSize: 18, fontFamily: 'Roboto'),
-        ),
-        buttonTheme: ButtonThemeData(
-          buttonColor: Colors.blue,
-          textTheme: ButtonTextTheme.primary,
-        ),
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => SplashScreen(),
-        '/signup': (context) => SignupPage(),
-        '/login': (context) => LoginPage(),
-        '/admin_dashboard': (context) => AdminDashboardPage(),
-        '/user_dashboard': (context) => UserDashboardPage(user: User(id: '', name: '', email: '', role: '')),
-        '/profile': (context) => UserProfilePage(user: User(id: '', name: '', email: '', role: '')),
-      },
+      debugShowCheckedModeBanner: false,
+      home: const LoginPage(),
     );
   }
 }

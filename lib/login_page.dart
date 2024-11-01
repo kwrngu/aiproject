@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:aiproject/admin_dashboard_page.dart';
+import 'package:aiproject/signup_page.dart';
+import 'package:aiproject/user.dart';
+import 'package:aiproject/user_dashboard_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'user.dart';
-import 'admin_dashboard_page.dart';
-import 'user_dashboard_page.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     } on auth.FirebaseAuthException catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = e.message; // Use Firebase error message
+        _errorMessage = e.message;
       });
       return null;
     }
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center content
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (_errorMessage != null)
               Padding(
@@ -88,24 +88,24 @@ class _LoginPageState extends State<LoginPage> {
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
-                prefixIcon: Icon(Icons.email), // Add prefix icon
-                border: OutlineInputBorder(), // Add outline border
+                prefixIcon: Icon(Icons.email),
+                border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16), // Add spacing
+            const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(
                 labelText: 'Password',
-                prefixIcon: Icon(Icons.lock), // Add prefix icon
-                border: OutlineInputBorder(), // Add outline border
+                prefixIcon: Icon(Icons.lock),
+                border: OutlineInputBorder(),
               ),
               obscureText: true,
             ),
-            const SizedBox(height: 24), // Add spacing
+            const SizedBox(height: 24),
             _isLoading
                 ? const CircularProgressIndicator()
-                : FilledButton( // Use FilledButton for Material 3
+                : FilledButton(
               onPressed: () async {
                 auth.User? user = await login(
                     _emailController.text, _passwordController.text);
@@ -114,14 +114,17 @@ class _LoginPageState extends State<LoginPage> {
                 }
               },
               style: FilledButton.styleFrom(
-                minimumSize: const Size(200, 50), // Set button size
+                minimumSize: const Size(200, 50),
               ),
               child: const Text('Log In'),
             ),
-            const SizedBox(height: 16), // Add spacing
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/signup');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignupPage()),
+                );
               },
               child: const Text('Don\'t have an account? Sign Up'),
             ),
