@@ -30,47 +30,52 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 20),
-          Text('All Leave Applications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('userLeaveApplication').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return CircularProgressIndicator();
-                var leaveApplications = snapshot.data!.docs;
-                return ListView.builder(
-                  itemCount: leaveApplications.length,
-                  itemBuilder: (context, index) {
-                    var leaveApp = leaveApplications[index];
-                    return ListTile(
-                      title: Text("Leave from ${leaveApp['startDate'].toDate()} to ${leaveApp['endDate'].toDate()}"),
-                      subtitle: Text("User: ${leaveApp['userName']} \nReason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.check),
-                            onPressed: () {
-                              updateLeaveStatus(leaveApp.id, 'Approved');
-                            },
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text('All Leave Applications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('userLeaveApplication').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  var leaveApplications = snapshot.data!.docs;
+                  return ListView.builder(
+                    itemCount: leaveApplications.length,
+                    itemBuilder: (context, index) {
+                      var leaveApp = leaveApplications[index];
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                        child: ListTile(
+                          title: Text("Leave from ${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year} to ${leaveApp['endDate'].toDate().day}-${leaveApp['endDate'].toDate().month}-${leaveApp['endDate'].toDate().year}"),
+                          subtitle: Text("User: ${leaveApp['userName']} \nReason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.check),
+                                onPressed: () {
+                                  updateLeaveStatus(leaveApp.id, 'Approved');
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.close),
+                                onPressed: () {
+                                  updateLeaveStatus(leaveApp.id, 'Rejected');
+                                },
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: Icon(Icons.close),
-                            onPressed: () {
-                              updateLeaveStatus(leaveApp.id, 'Rejected');
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

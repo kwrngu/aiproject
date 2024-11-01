@@ -26,7 +26,7 @@ class UserProfilePage extends StatelessWidget {
             Text('Role: ${user.role}', style: TextStyle(fontSize: 18)),
             Divider(),
             Text('Leave Usage', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            // Example leave usage details
+            // Example leave usage details, to be fetched dynamically
             Text('Total Leaves: 20'),
             Text('Used Leaves: 10'),
             Text('Remaining Leaves: 10'),
