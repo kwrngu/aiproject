@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../pages/admin_dashboard_page.dart';
-import '../pages/user_dashboard_page.dart';
+import '../pages/admin_dashboard_page/admin_dashboard_page.dart';
+import '../pages/user_dashboard_page/user_dashboard_page.dart';
 import '../models/user.dart';
 
 class SplashScreen extends StatefulWidget {

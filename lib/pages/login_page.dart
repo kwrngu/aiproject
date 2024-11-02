@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user.dart';
-import 'admin_dashboard_page.dart';
-import 'user_dashboard_page.dart';
+import 'admin_dashboard_page/admin_dashboard_page.dart';
+import 'user_dashboard_page/user_dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
