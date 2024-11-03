@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import '../../models/user.dart';
 import '../user_profile_page.dart';
 import 'shift_details_card.dart';
-import 'leave_usage_card.dart';
+
 import 'payroll_card.dart';
 import '../expense_claim_details_page/expense_claim_details_page.dart';
 
