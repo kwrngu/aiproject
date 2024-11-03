@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-
-import '../../models/user.dart';
 import '../duty_roster_page.dart'; // Import DutyRosterPage
 
+import 'leave_management_page.dart'; // Import LeaveManagementPage
 
 class AdminDashboardPage extends StatefulWidget {
   @override
@@ -12,6 +11,28 @@ class AdminDashboardPage extends StatefulWidget {
 }
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
+  Future<int> _getTotalPendingClaims() async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('expenseClaims')
+        .where('status', isEqualTo: 'Pending')
+        .get();
+    return querySnapshot.docs.length;
+  }
+
+  Future<int> _getTotalLeaveRequests() async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('leaveApplications')
+        .get();
+    return querySnapshot.docs.length;
+  }
+
+  Future<int> _getTotalStaff() async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('staff')
+        .get();
+    return querySnapshot.docs.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,75 +48,107 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => DutyRosterPage()),
-              );
-            },
-            child: Text('Manage Duty Roster'),
-          ),
-          SizedBox(height: 20),
-          const Text('View Expense Claims'),
-          SizedBox(height: 20),
-          Text(
-              'All User Leave Applications',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('userLeaveApplication')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return CircularProgressIndicator();
-                var leaveApplications = snapshot.data!.docs;
-                return ListView.builder(
-                  itemCount: leaveApplications.length,
-                  itemBuilder: (context, index) {
-                    var leaveApp = leaveApplications[index];
-                    return Card(
-                      margin:
-                      EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                      child: ListTile(
-                        title: Text(
-                            "Leave from ${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year} to ${leaveApp['endDate'].toDate().day}-${leaveApp['endDate'].toDate().month}-${leaveApp['endDate'].toDate().year}"),
-                        subtitle: Text(
-                            "User: ${leaveApp['userName']} \nReason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.check),
-                              onPressed: () {
-                                FirebaseFirestore.instance
-                                    .collection('userLeaveApplication')
-                                    .doc(leaveApp.id)
-                                    .update({'status': 'Approved'});
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () {
-                                FirebaseFirestore.instance
-                                    .collection('userLeaveApplication')
-                                    .doc(leaveApp.id)
-                                    .update({'status': 'Rejected'});
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.count(
+          crossAxisCount: 2,
+          childAspectRatio: 1, // Square cards
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          children: [
+            _buildManagementCard(
+              title: 'Leave Management',
+              icon: Icons.beach_access,
+              future: _getTotalLeaveRequests(),
+              color: Colors.blue[100],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LeaveManagementPage()),
                 );
               },
             ),
+            _buildManagementCard(
+              title: 'Payroll Management',
+              icon: Icons.account_balance_wallet,
+              future: Future.value(0), // Placeholder, replace with actual future
+              color: Colors.green[100],
+            ),
+            _buildManagementCard(
+              title: 'Attendance Management',
+              icon: Icons.access_time,
+              future: Future.value(0), // Placeholder, replace with actual future
+              color: Colors.orange[100],
+            ),
+            _buildManagementCard(
+              title: 'Shift Management',
+              icon: Icons.schedule,
+              future: Future.value(0), // Placeholder, replace with actual future
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DutyRosterPage()),
+                );
+              },
+              color: Colors.purple[100],
+            ),
+            _buildManagementCard(
+              title: 'Claim Management',
+              icon: Icons.receipt,
+              future: _getTotalPendingClaims(),
+              color: Colors.red[100],
+            ),
+            _buildManagementCard(
+              title: 'Staff Management',
+              icon: Icons.people,
+              future: _getTotalStaff(),
+              color: Colors.yellow[100],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildManagementCard({
+    required String title,
+    required IconData icon,
+    required Future<int> future,
+    Color? color,
+    VoidCallback? onTap,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      elevation: 5,
+      color: color,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 50, color: Theme.of(context).colorScheme.primary),
+              SizedBox(height: 10),
+              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              FutureBuilder<int>(
+                future: future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error');
+                  } else {
+                    return Text('Total: ${snapshot.data}');
+                  }
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

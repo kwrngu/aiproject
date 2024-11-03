@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _redirectToDashboard(auth.User user) async {
     DocumentSnapshot doc = await FirebaseFirestore.instance.collection('newProjectUser').doc(user.uid).get();
     if (doc.exists) {
-      User currentUser = User.fromMap(doc.data() as Map<String, dynamic>);
+      AppUser currentUser = AppUser.fromMap(doc.data() as Map<String, dynamic>);
       if (currentUser.role == 'admin') {
         Navigator.pushReplacement(
           context,

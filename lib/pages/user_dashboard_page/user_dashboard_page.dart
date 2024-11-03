@@ -1,17 +1,17 @@
-import 'package:aiproject/pages/user_dashboard_page/shift_details_card.dart';
+import 'package:aiproject/pages/user_dashboard_page/user_leave_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../models/user.dart';
 import '../user_profile_page.dart';
+import 'shift_details_card.dart';
 import 'leave_usage_card.dart';
-
-import 'expense_claim_card.dart';
 import 'payroll_card.dart';
+import '../expense_claim_details_page/expense_claim_details_page.dart';
 
 
 class UserDashboardPage extends StatefulWidget {
-  final User user;
+  final AppUser user;
 
   UserDashboardPage({required this.user});
 
@@ -73,8 +73,52 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
           crossAxisCount: 2,
           children: [
             ShiftDetailCard(user: widget.user),
-            LeaveUsageCard(user: widget.user),
-            ExpenseClaimCard(user: widget.user, claimStatus: "Pending"), // Example status
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserLeaveDetailsPage(user: widget.user)),
+                );
+              },
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                elevation: 5,
+                margin: EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.beach_access, size: 50, color: Theme.of(context).colorScheme.primary),
+                    SizedBox(height: 10),
+                    Text('My Leave', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ExpenseClaimDetailsPage(user: widget.user)),
+                );
+              },
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                elevation: 5,
+                margin: EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.receipt, size: 50, color: Theme.of(context).colorScheme.primary),
+                    SizedBox(height: 10),
+                    Text('Expense Claim', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
             PayrollCard(),
           ],
         ),

@@ -23,7 +23,7 @@ class _SignupPageState extends State<SignupPage> {
     });
     try {
       auth.UserCredential userCredential = await auth.FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-      User newUser = User(
+      AppUser newUser = AppUser(
         id: userCredential.user!.uid,
         name: name,
         email: email,

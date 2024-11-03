@@ -44,8 +44,8 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupPage(),
         '/login': (context) => LoginPage(),
         '/admin_dashboard': (context) => AdminDashboardPage(),
-        '/user_dashboard': (context) => UserDashboardPage(user: User(id: '', name: '', email: '', role: '')),
-        '/profile': (context) => UserProfilePage(user: User(id: '', name: '', email: '', role: '')),
+        '/user_dashboard': (context) => UserDashboardPage(user: AppUser(id: '', name: '', email: '', role: '')),
+        '/profile': (context) => UserProfilePage(user: AppUser(id: '', name: '', email: '', role: '')),
       },
     );
   }

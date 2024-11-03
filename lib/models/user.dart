@@ -1,14 +1,14 @@
-class User {
+class AppUser {
   String id;
   String name;
   String email;
   String role; // 'admin' or 'user'
   String? profilePictureUrl;
 
-  User({required this.id, required this.name, required this.email, required this.role, this.profilePictureUrl});
+  AppUser({required this.id, required this.name, required this.email, required this.role, this.profilePictureUrl});
 
-  factory User.fromMap(Map<String, dynamic> data) {
-    return User(
+  factory AppUser.fromMap(Map<String, dynamic> data) {
+    return AppUser(
       id: data['id'],
       name: data['name'],
       email: data['email'],
