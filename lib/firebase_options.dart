@@ -61,10 +61,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDDNnDLt2KC6DF05ajseQV39Q68ETFSXy4',
-    appId: '1:72023854447:android:c7513fe60d81d362dc6c9a',
+    appId: '1:72023854447:android:a5110b526109ed6fdc6c9a',
     messagingSenderId: '72023854447',
     projectId: 'bestportservice',
     databaseURL: 'https://bestportservice.firebaseio.com',
+
     storageBucket: 'bestportservice.appspot.com',
   );
+
 }

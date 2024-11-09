@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -12,7 +13,7 @@ class AdminDashboardPage extends StatefulWidget {
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   Future<int> _getTotalPendingClaims() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase')
         .collection('expenseClaims')
         .where('status', isEqualTo: 'Pending')
         .get();
@@ -20,14 +21,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Future<int> _getTotalLeaveRequests() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase')
         .collection('leaveApplications')
         .get();
     return querySnapshot.docs.length;
   }
 
   Future<int> _getTotalStaff() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase')
         .collection('staff')
         .get();
     return querySnapshot.docs.length;

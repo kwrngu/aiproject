@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,7 +31,7 @@ class _SignupPageState extends State<SignupPage> {
         role: 'user', // default role
       );
 
-      await FirebaseFirestore.instance.collection('newProjectUser').doc(newUser.id).set(newUser.toMap());
+      await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('newProjectUser').doc(newUser.id).set(newUser.toMap());
       setState(() {
         _isLoading = false;
       });

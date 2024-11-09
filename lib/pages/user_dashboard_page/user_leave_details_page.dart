@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,7 +32,7 @@ class _UserLeaveDetailsPageState extends State<UserLeaveDetailsPage> with Single
   Future<void> _createLeaveApplication(String reason, DateTime startDate, DateTime endDate) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await FirebaseFirestore.instance.collection('leaveApplications').add({
+      await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('leaveApplications').add({
         'userId': user.uid,
         'userName': widget.user.name,
         'reason': reason,
@@ -83,7 +84,7 @@ class _UserLeaveDetailsPageState extends State<UserLeaveDetailsPage> with Single
 
   Widget _buildLeaveList(String status) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
+      stream: FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase')
           .collection('leaveApplications')
           .where('userId', isEqualTo: widget.user.id)
           .snapshots(),
@@ -104,8 +105,18 @@ class _UserLeaveDetailsPageState extends State<UserLeaveDetailsPage> with Single
               margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
               child: ListTile(
                 title: Text(
-                    "Leave from ${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year} to ${leaveApp['endDate'].toDate().day}-${leaveApp['endDate'].toDate().month}-${leaveApp['endDate'].toDate().year}"),
-                subtitle: Text("Reason: ${leaveApp['reason']} \nStatus: ${leaveApp['status']}"),
+                    "${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year}"),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Name: ${leaveApp['userName']}"),
+                    Text("Reason: ${leaveApp['reason']}"),
+                  ],
+                ),
+                trailing: Icon(
+                  leaveApp['status'] == 'Approved' ? Icons.check_circle : leaveApp['status'] == 'Rejected' ? Icons.cancel : Icons.hourglass_top,
+                  color: leaveApp['status'] == 'Approved' ? Colors.green : leaveApp['status'] == 'Rejected' ? Colors.red : Colors.orange,
+                ),
               ),
             );
           },

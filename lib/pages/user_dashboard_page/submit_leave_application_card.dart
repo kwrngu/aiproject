@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+
 import '../../models/user.dart';
 
 
@@ -27,7 +29,9 @@ class _SubmitLeaveApplicationCardState extends State<SubmitLeaveApplicationCard>
   }
 
   Future<void> submitLeaveApplication(String reason, int days, String type, DateTime startDate, DateTime endDate) async {
-    await FirebaseFirestore.instance.collection('userLeaveApplication').add({
+
+
+     FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('puserLeaveApplication').add({
       'userId': widget.user.id,
       'userName': widget.user.name,
       'reason': reason,

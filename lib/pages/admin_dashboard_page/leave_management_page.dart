@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -57,7 +58,7 @@ class _LeaveManagementPageState extends State<LeaveManagementPage> with SingleTi
 
   Widget _buildLeaveList(String status) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('leaveApplications').snapshots(),
+      stream: FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('leaveApplications').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return CircularProgressIndicator();
         var leaveApplications = snapshot.data!.docs.where((doc) {
@@ -77,7 +78,7 @@ class _LeaveManagementPageState extends State<LeaveManagementPage> with SingleTi
                 title: Text(
                     "Leave from ${leaveApp['startDate'].toDate().day}-${leaveApp['startDate'].toDate().month}-${leaveApp['startDate'].toDate().year} to ${leaveApp['endDate'].toDate().day}-${leaveApp['endDate'].toDate().month}-${leaveApp['endDate'].toDate().year}"),
                 subtitle: Text(
-                    "User: ${leaveApp['userName']} \nReason: ${leaveApp['reason']} \nType: ${leaveApp['type']} \nStatus: ${leaveApp['status']}"),
+                    "User: ${leaveApp['userName']} \nReason: ${leaveApp['reason']}  \nStatus: ${leaveApp['status']}"),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -85,7 +86,7 @@ class _LeaveManagementPageState extends State<LeaveManagementPage> with SingleTi
                       IconButton(
                         icon: Icon(Icons.check),
                         onPressed: () {
-                          FirebaseFirestore.instance
+                          FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase')
                               .collection('leaveApplications')
                               .doc(leaveApp.id)
                               .update({'status': 'Approved'});
@@ -95,7 +96,7 @@ class _LeaveManagementPageState extends State<LeaveManagementPage> with SingleTi
                       IconButton(
                         icon: Icon(Icons.close),
                         onPressed: () {
-                          FirebaseFirestore.instance
+                          FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase')
                               .collection('leaveApplications')
                               .doc(leaveApp.id)
                               .update({'status': 'Rejected'});

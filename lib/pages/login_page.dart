@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _redirectToDashboard(auth.User user) async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('newProjectUser').doc(user.uid).get();
+    DocumentSnapshot doc = await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('newProjectUser').doc(user.uid).get();
     if (doc.exists) {
       AppUser currentUser = AppUser.fromMap(doc.data() as Map<String, dynamic>);
       if (currentUser.role == 'admin') {

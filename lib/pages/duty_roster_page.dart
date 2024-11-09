@@ -1,7 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import '../models/user.dart';
+
+
 
 class DutyRosterPage extends StatefulWidget {
   @override
@@ -17,12 +18,12 @@ class _DutyRosterPageState extends State<DutyRosterPage> {
   ScrollController _verticalScrollController = ScrollController();
 
   Future<void> loadDutyRoster() async {
-    var usersSnapshot = await FirebaseFirestore.instance.collection('newProjectUser').get();
+    var usersSnapshot = await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('newProjectUser').get();
     for (var userDoc in usersSnapshot.docs) {
       var userId = userDoc.id;
       var userName = userDoc['name'];
       userNames[userId] = userName;
-      var shiftsSnapshot = await FirebaseFirestore.instance
+      var shiftsSnapshot = await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase')
           .collection('dutyRosters')
           .doc(userId)
           .collection('shifts')
@@ -44,7 +45,7 @@ class _DutyRosterPageState extends State<DutyRosterPage> {
     for (var userId in dutyRoster.keys) {
       for (var date in dutyRoster[userId]!.keys) {
         var shift = dutyRoster[userId]![date];
-        await FirebaseFirestore.instance.collection('dutyRosters').doc(userId).collection('shifts').doc(date.toIso8601String()).set({
+        await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('dutyRosters').doc(userId).collection('shifts').doc(date.toIso8601String()).set({
           'userId': userId,
           'date': date,
           'shift': shift,

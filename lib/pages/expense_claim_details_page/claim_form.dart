@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -132,7 +133,7 @@ class _ClaimFormState extends State<ClaimForm> {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-    await FirebaseFirestore.instance.collection('expenseClaims').add(claim.toMap());
+    await FirebaseFirestore.instanceFor(app: Firebase.app(),databaseId: 'aidatabase').collection('expenseClaims').add(claim.toMap());
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Claim submitted successfully')));
     setState(() {
       expenses.clear();
